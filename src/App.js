@@ -1,24 +1,69 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import Cert from "./Cert";
+import {
+  Box,
+  Input,
+  Button,
+  Heading,
+  FormControl,
+useToast
+} from "@chakra-ui/react";
 
 function App() {
+  const [certnumber, setCettnumber] = useState("");
+  const [data, setData] = useState([]);
+  const toast = useToast()
+  const onsubmit = async (e) => {
+    e.preventDefault();
+    fetch(`http://localhost:1337/certificates?Certnumber=${certnumber}`, {
+      method: "GET",
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setData(data);
+        console.log(data);
+        data.length === 0 && toast({
+          title: "Certificate not found.",
+          position: 'top',
+          status: "error",
+          variant: 'solid',
+          duration: 9000,
+          isClosable: true,
+        })
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Box w="auto" m="auto" mt="5">
+      <Heading as="h2" size="xl" textAlign="center">
+        Certificate Verification System
+      </Heading>
+      <Box maxW="50%" m="auto" mt="5">
+        <form onSubmit={onsubmit}>
+          <FormControl isRequired>
+        
+            <Input
+              type="text"
+              onChange={(e) => setCettnumber(e.target.value)}
+            />
+            <Button
+              as="button"
+              colorScheme="teal"
+              variant="outline"
+              m="auto"
+              d="block"
+              mt="5"
+            >
+              Check
+            </Button>
+          </FormControl>
+        </form>
+      </Box>
+      {data.length !== 0 && <Cert data={data} />}
+    </Box>
   );
 }
 
